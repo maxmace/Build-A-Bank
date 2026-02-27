@@ -18,59 +18,70 @@
 
         /* Sidebar Styles */
         .sidebar { 
-            width: 320px; background: var(--panel); border-right: 1px solid var(--border);
+            width: 380px; min-width: 300px; max-width: 800px;
+            background: var(--panel); border-right: 1px solid var(--border);
             display: flex; flex-direction: column; padding: 12px; box-sizing: border-box;
+            position: relative;
         }
-        .file-list-container { flex-grow: 1; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
-        .list-header { font-size: 11px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-        .instruction-label { font-size: 10px; color: var(--instruction); line-height: 1.3; margin-bottom: 5px; }
-        .instruction-label.blue-sub { color: var(--accent); font-weight: 600; }
         
-        .list-box { background: #111; border: 1px solid var(--border); flex: 1; overflow: auto; border-radius: 4px; min-height: 100px; margin-bottom: 10px; position: relative;}
+        .sidebar-resizer {
+            position: absolute; right: -3px; top: 0; width: 6px; height: 100%;
+            cursor: col-resize; z-index: 100;
+        }
 
-        /* Table Resizing Styles */
-        table { width: 100%; border-collapse: collapse; font-size: 10px; table-layout: fixed; }
+        .tab-container { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 10px; gap: 0; }
+        .tab {
+            padding: 8px 12px; font-size: 10px; font-weight: 800; color: #888;
+            text-transform: uppercase; cursor: pointer; border-radius: 4px 4px 0 0;
+            background: #1a1a1a; transition: 0.2s;
+            border: 1px solid #333; border-bottom: none; margin-right: 2px;
+        }
+        .tab:hover { color: var(--vfd); border-color: #444; }
+        .tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+        /* Search Bar & Nav */
+        .search-wrap { margin-bottom: 10px; display: flex; flex-direction: column; gap: 5px; }
+        .search-row { display: flex; gap: 5px; }
+        .search-input {
+            flex: 1; background: #000; border: 1px solid var(--border);
+            color: var(--vfd); padding: 6px 10px; border-radius: 4px;
+            font-size: 11px; outline: none;
+        }
+        .search-nav-btn {
+            background: #333; color: white; border: 1px solid #444;
+            padding: 0 8px; border-radius: 4px; cursor: pointer; font-size: 10px;
+        }
+        .search-nav-btn:disabled { opacity: 0.3; cursor: default; }
+        .match-counter { font-size: 9px; color: var(--accent); font-weight: bold; margin-top: 2px; }
+
+        .file-list-container { flex-grow: 1; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+        .list-box { background: #111; border: 1px solid var(--border); flex: 1; overflow: auto; border-radius: 4px; position: relative;}
+        .tab-content { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+        .tab-content.active { display: flex; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 9px; table-layout: fixed; }
         th { 
             position: sticky; top: 0; background: #222; color: var(--accent); 
             text-align: left; padding: 5px; cursor: pointer; border-bottom: 2px solid var(--border);
-            white-space: nowrap; overflow: hidden;
+            white-space: nowrap; overflow: hidden; z-index: 5;
         }
-        td { 
-            padding: 4px 6px; border-bottom: 1px solid #222; 
-            white-space: nowrap; color: #aaa; 
-            overflow: hidden; text-overflow: clip; 
-        }
-        tr:hover td { background: #222; color: var(--vfd); cursor: pointer; }
+        th:hover { background: #333; color: #fff; }
+        th.sort-active { color: var(--esq-gold); }
         
-        .resizer {
-            position: absolute; right: 0; top: 0; height: 100%; width: 5px;
-            cursor: col-resize; z-index: 10;
-        }
+        td { padding: 4px 6px; border-bottom: 1px solid #222; white-space: nowrap; color: #aaa; overflow: hidden; text-overflow: ellipsis; }
+        tr:hover td { background: #222; color: var(--vfd); cursor: pointer; }
+        tr.search-highlight td { background: rgba(74, 144, 226, 0.2); color: #fff; border-left: 2px solid var(--accent); }
+        tr.active-match td { background: rgba(241, 196, 15, 0.3); color: var(--esq-gold); }
+        
+        .resizer { position: absolute; right: 0; top: 0; height: 100%; width: 5px; cursor: col-resize; z-index: 10; }
 
-        /* Glass Buttons */
         .btn { 
             background: linear-gradient(180deg, var(--glass-shine) 0%, rgba(255,255,255,0) 50%, var(--glass-shadow) 100%), var(--accent);
             color: white; border: 1px solid rgba(255,255,255,0.2); 
             padding: 10px; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 11px;
             text-shadow: 0px 1px 2px rgba(0,0,0,0.5);
             box-shadow: inset 1px 1px 1px rgba(255,255,255,0.3), 0px 4px 6px rgba(0,0,0,0.3);
-            transition: all 0.1s ease; text-transform: uppercase;
-        }
-        .btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
-        .btn:active { transform: translateY(1px); filter: brightness(0.9); }
-
-        #modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); display: none;
-            align-items: center; justify-content: center; z-index: 1000;
-        }
-        .modal-content {
-            background: var(--panel); border: 1px solid var(--accent);
-            padding: 25px; border-radius: 12px; width: 400px;
-        }
-        .modal-content input, .modal-content textarea {
-            width: 100%; background: #111; border: 1px solid #444; color: #eee;
-            padding: 10px; margin: 10px 0; border-radius: 4px; box-sizing: border-box; font-size: 12px;
+            transition: all 0.1s ease; text-transform: uppercase; margin-top: 10px;
         }
 
         .main-content { flex: 1; padding: 15px 25px; overflow-y: auto; display: flex; flex-direction: column; }
@@ -84,34 +95,60 @@
         .int-header { font-size: 9px; color: var(--esq-gold); margin-bottom: 4px; font-weight: bold; }
         .patch-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; }
         
-        .slot { height: 30px; background: #222; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--vfd); cursor: grab; font-family: 'JetBrains Mono', monospace; }
+        .slot { height: 30px; background: #222; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--vfd); cursor: grab; font-family: 'JetBrains Mono', monospace; position: relative; }
         .slot.empty { color: #333; }
         
+        .rename-input { 
+            position: absolute; width: 90%; height: 80%; background: #000; color: var(--esq-gold);
+            border: 1px solid var(--accent); text-align: center; font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; text-transform: uppercase; outline: none; z-index: 5;
+        }
+
         .workshop-area { background: #161616; padding: 12px; border-radius: 8px; border: 1px solid #222; }
         .scratch-compact { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #333; }
-        .scratch-slot { height: 28px; font-size: 9px; border-style: dashed; }
         #comment-box { background: #0a0a0a; border: 1px solid var(--accent); color: var(--vfd); padding: 8px 12px; height: 28px; font-size: 11px; margin-bottom: 12px; border-radius: 4px; display: flex; align-items: center; }
+
+        #modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); display: none;
+            align-items: center; justify-content: center; z-index: 1000;
+        }
+        .modal-content {
+            background: var(--panel); border: 1px solid var(--accent);
+            padding: 25px; border-radius: 12px; width: 400px;
+        }
+        .modal-input {
+            width:100%; margin-bottom:10px; background:#111; color:#fff; border:1px solid #444; padding:8px; box-sizing: border-box; font-size: 11px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-resizer" id="sidebar-resizer"></div>
+        <div class="tab-container">
+            <div id="tab-bank" class="tab active" onclick="switchTab('bank')">Bank Files</div>
+            <div id="tab-single" class="tab" onclick="switchTab('single')">Single Patches</div>
+        </div>
+
+        <div class="search-wrap">
+            <div class="search-row">
+                <input type="text" id="lib-search" class="search-input" placeholder="Search Patch Names" oninput="handleSearchInput()">
+                <button class="search-nav-btn" id="prev-btn" onclick="navSearch(-1)" title="Previous Match">▲</button>
+                <button class="search-nav-btn" id="next-btn" onclick="navSearch(1)" title="Next Match">▼</button>
+            </div>
+            <div id="match-count" class="match-counter">0 matches found</div>
+        </div>
+
         <div class="file-list-container">
-            <div class="list-header">Bank Files</div>
-            <div class="instruction-label">Select to display patches</div>
-            <div id="bank-list" class="list-box"></div>
-            
-            <div class="list-header">Single Patches</div>
-            <!--
-                <div class="instruction-label blue-sub">single patchesin line help</div>
-            -->
-            <div id="single-list" class="list-box"></div>
+            <div id="bank-tab" class="tab-content active"><div id="bank-list" class="list-box"></div></div>
+            <div id="single-tab" class="tab-content"><div id="single-list" class="list-box"></div></div>
         </div>
         <button class="btn" onclick="openUploadModal()">Upload new bank or single patch</button>
     </div>
 
     <div class="main-content">
-        <div id="comment-box">Metadata: Select a file or patch to view uploader details...</div>
+        <div id="comment-box">Metadata: Select a file to view internal patches...</div>
         
         <section>
             <h2 style="font-size: 12px; color: var(--vfd); margin-bottom: 4px;">Bank View (Source)</h2>
@@ -142,7 +179,6 @@
 
             <section>
                 <h2 style="font-size: 10px; color: #777; margin-top: 8px;">Scratchpad</h2>
-                <div class="instruction-label">If needed, drag patches to these temporary locations while you arrange your bank</div>
                 <div class="scratch-compact" id="placeholders"></div>
             </section>
             
@@ -156,13 +192,12 @@
         <div class="modal-content">
             <h3>Deposit SysEx to Library</h3>
             <form id="uploadForm">
-                <input type="file" name="sysexFile" required>
-                <input type="text" name="userName" placeholder="Uploader Name">
-                <textarea name="comments" placeholder="Comments..."></textarea>
-                <div class="modal-actions">
-                    <button type="submit" class="btn">Start Upload</button>
-                    <button type="button" class="btn" style="background: #555;" onclick="closeUploadModal()">Cancel</button>
-                </div>
+                <input type="file" name="sysexFile" required style="width:100%; margin-bottom:15px;">
+                <input type="text" name="userName" placeholder="Uploader Name" class="modal-input" required>
+                <input type="text" name="origDate" placeholder="Original Creation Date (e.g. 1987)" class="modal-input">
+                <textarea name="comments" placeholder="Comments..." class="modal-input" style="height: 60px;"></textarea>
+                <button type="submit" class="btn" style="width: 100%;">Start Upload</button>
+                <button type="button" class="btn" style="background:#555; width: 100%;" onclick="closeUploadModal()">Cancel</button>
             </form>
         </div>
     </div>
@@ -174,7 +209,16 @@
         let draggedPatch = null;
         let dragSourceInfo = null;
         let currentLibraryData = {};
+        let activeRenameIdx = null;
+        let currentTab = 'bank';
+        
+        let searchMatches = [];
+        let currentMatchIdx = -1;
 
+        // Sorting state
+        let sortConfig = { key: 'name', direction: 'asc' };
+
+        // Initialize Grids
         function initGrids() {
             for (let i=1; i<=4; i++) {
                 const bldGrid = document.getElementById(`bld-int-${i}`);
@@ -197,24 +241,213 @@
 
         function createSlot(idx, data, type) {
             const div = document.createElement('div');
-            const isScratch = type === 'scratch';
-            div.className = `slot ${!data ? 'empty' : ''} ${isScratch ? 'scratch-slot' : ''}`;
-            div.innerText = data ? data.name : (isScratch ? '---' : idx + 1);
+            div.className = `slot ${!data ? 'empty' : ''}`;
+            div.innerText = data ? data.name : (type === 'scratch' ? '---' : idx + 1);
             div.draggable = !!data;
             div.ondragstart = (e) => { draggedPatch = data; dragSourceInfo = { type, idx }; };
             div.ondragover = (e) => e.preventDefault();
             div.ondrop = (e) => { e.preventDefault(); handleDrop(idx, type); };
+            if (type === 'build' && data) { div.ondblclick = () => startRename(idx, div); }
             return div;
         }
+
+        // --- SEARCH LOGIC ---
+        function handleSearchInput() {
+            const query = document.getElementById('lib-search').value.trim().toLowerCase();
+            searchMatches = [];
+            currentMatchIdx = -1;
+
+            if (query.length < 2) {
+                document.getElementById('match-count').innerText = "0 matches found";
+                renderTable(`${currentTab}-list`, currentTab);
+                return;
+            }
+
+            Object.entries(currentLibraryData).forEach(([filename, meta]) => {
+                const foundInPatches = meta.patch_names && meta.patch_names.some(p => p.toLowerCase().includes(query));
+                const foundInFile = filename.toLowerCase().includes(query);
+                if (foundInPatches || foundInFile) {
+                    searchMatches.push({ filename, type: meta.type });
+                }
+            });
+
+            document.getElementById('match-count').innerText = `${searchMatches.length} matches found`;
+            renderTable(`${currentTab}-list`, currentTab, query);
+            document.getElementById('next-btn').disabled = searchMatches.length === 0;
+            document.getElementById('prev-btn').disabled = searchMatches.length === 0;
+        }
+
+        function navSearch(dir) {
+            if (searchMatches.length === 0) return;
+            currentMatchIdx += dir;
+            if (currentMatchIdx >= searchMatches.length) currentMatchIdx = 0;
+            if (currentMatchIdx < 0) currentMatchIdx = searchMatches.length - 1;
+
+            const target = searchMatches[currentMatchIdx];
+            if (target.type !== currentTab) switchTab(target.type);
+            
+            renderTable(`${currentTab}-list`, currentTab, document.getElementById('lib-search').value.trim().toLowerCase());
+            const row = document.querySelector(`tr[data-filename="${target.filename}"]`);
+            if (row) {
+                row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                row.classList.add('active-match');
+            }
+        }
+
+        // --- SORTING LOGIC ---
+        function handleSort(key) {
+            if (sortConfig.key === key) {
+                sortConfig.direction = sortConfig.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortConfig.key = key;
+                sortConfig.direction = 'asc';
+            }
+            renderTable(`${currentTab}-list`, currentTab, document.getElementById('lib-search').value.trim());
+        }
+
+        function renderTable(containerId, typeFilter, query = "") {
+            const container = document.getElementById(containerId);
+            let files = Object.entries(currentLibraryData)
+                .filter(([name, data]) => data.type === typeFilter)
+                .map(([name, data]) => ({ 
+                    name, 
+                    date: data.date || '', 
+                    original_date: data.original_date || '', 
+                    user: data.user || '', 
+                    comments: data.comments || '',
+                    patch_names: data.patch_names || []
+                }));
+
+            // Apply Sort
+            files.sort((a, b) => {
+                let valA = a[sortConfig.key].toLowerCase();
+                let valB = b[sortConfig.key].toLowerCase();
+                if (valA < valB) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (valA > valB) return sortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            const getHeaderClass = (key) => sortConfig.key === key ? 'sort-active' : '';
+            const getSortIndicator = (key) => sortConfig.key === key ? (sortConfig.direction === 'asc' ? ' ▴' : ' ▾') : '';
+
+            let html = `<table><thead><tr>
+                <th style="width:25%" class="${getHeaderClass('name')}" onclick="handleSort('name')">File${getSortIndicator('name')}</th>
+                <th style="width:15%" class="${getHeaderClass('date')}" onclick="handleSort('date')">Uploaded${getSortIndicator('date')}</th>
+                <th style="width:15%" class="${getHeaderClass('original_date')}" onclick="handleSort('original_date')">Orig Date${getSortIndicator('original_date')}</th>
+                <th style="width:15%" class="${getHeaderClass('user')}" onclick="handleSort('user')">Author${getSortIndicator('user')}</th>
+                <th style="width:30%">Comments</th>
+            </tr></thead><tbody>`;
+
+            files.forEach(f => {
+                const queryLower = query.toLowerCase();
+                const isMatch = query.length >= 2 && (f.name.toLowerCase().includes(queryLower) || (f.patch_names && f.patch_names.some(p => p.toLowerCase().includes(queryLower))));
+                const isActive = searchMatches[currentMatchIdx] && searchMatches[currentMatchIdx].filename === f.name;
+                
+                let displayPatches = [];
+                if (query.length >= 2 && f.patch_names) {
+                    displayPatches = f.patch_names.filter(p => p.toLowerCase().includes(queryLower));
+                }
+                const toolTip = displayPatches.length > 0 ? "Matching: " + displayPatches.join(', ') : "Internal: " + (f.patch_names.length > 0 ? f.patch_names.slice(0, 5).join(', ') + '...' : 'N/A');
+
+                html += `<tr data-filename="${f.name}" class="${isMatch ? 'search-highlight' : ''} ${isActive ? 'active-match' : ''}" 
+                           onclick="loadFileToSource('${f.name}')" title="${toolTip}">
+                    <td>${f.name}</td>
+                    <td>${f.date || '--'}</td>
+                    <td>${f.original_date || '--'}</td>
+                    <td>${f.user || 'Anon'}</td>
+                    <td>${f.comments || ''}</td>
+                </tr>`;
+            });
+            container.innerHTML = html + `</tbody></table>`;
+        }
+
+        // --- UPLOAD HANDLER ---
+        document.getElementById('uploadForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            try {
+                const response = await fetch('upload.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.text();
+                if (result.includes("Success")) {
+                    alert(result);
+                    closeUploadModal();
+                    refreshLibrary();
+                } else {
+                    alert(result);
+                }
+            } catch (err) {
+                alert("Network error occurred during upload.");
+            }
+        };
+
+        async function loadFileToSource(filename) {
+            const fileMeta = currentLibraryData[filename];
+            document.getElementById('comment-box').innerText = `File: ${filename} | Author: ${fileMeta.user || 'Unknown'} | Original: ${fileMeta.original_date || 'Unknown'}`;
+            try {
+                const response = await fetch(`patches/${filename}`);
+                const arrayBuffer = await response.arrayBuffer();
+                const rawData = new Uint8Array(arrayBuffer);
+                let sounds = [];
+                for (let i = 5; i < rawData.length - 1; i += 2) { 
+                    if (rawData[i+1] !== undefined) {
+                        sounds.push((rawData[i+1] << 4) | (rawData[i] & 0x0F));
+                    }
+                }
+                currentSourcePatches = new Array(40).fill(null);
+                const isBank = sounds.length >= 4080;
+                if (isBank) {
+                    for (let p = 0; p < 40; p++) {
+                        let pcb = sounds.slice(p * 102, (p + 1) * 102);
+                        let nameChars = [];
+                        for(let c=0; c<6; c++) nameChars.push(String.fromCharCode(pcb[c]));
+                        currentSourcePatches[p] = { name: nameChars.join('').trim() || `BNK ${p+1}`, data: pcb };
+                    }
+                } else {
+                    let nameChars = [];
+                    for(let c=0; c<6; c++) nameChars.push(String.fromCharCode(sounds[c]));
+                    currentSourcePatches[0] = { name: nameChars.join('').trim() || "SINGLE", data: sounds.slice(0, 102) };
+                }
+                initGrids();
+            } catch (err) { console.error("Load fail", err); }
+        }
+
+        function switchTab(type) {
+            currentTab = type;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`tab-${type}`).classList.add('active');
+            document.getElementById(`${type}-tab`).classList.add('active');
+            renderTable(`${currentTab}-list`, currentTab, document.getElementById('lib-search').value.trim());
+        }
+
+        async function refreshLibrary() {
+            try {
+                const response = await fetch('get_library.php');
+                currentLibraryData = await response.json();
+                renderTable('bank-list', 'bank');
+                renderTable('single-list', 'single');
+            } catch(e) { console.error("Sync error"); }
+        }
+
+        // Draggable sidebar
+        const sidebar = document.getElementById('sidebar');
+        const sidebarResizer = document.getElementById('sidebar-resizer');
+        sidebarResizer.addEventListener('mousedown', (e) => {
+            const onMouseMove = (me) => { sidebar.style.width = me.pageX + 'px'; };
+            const onMouseUp = () => { document.removeEventListener('mousemove', onMouseMove); };
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
 
         function handleDrop(targetIdx, targetType) {
             if (!draggedPatch) return;
             let targetArr = (targetType === 'build') ? buildBank : (targetType === 'scratch' ? scratchpad : null);
             if (!targetArr) return;
-
-            if (dragSourceInfo.type === 'source') {
-                targetArr[targetIdx] = JSON.parse(JSON.stringify(draggedPatch));
-            } else {
+            if (dragSourceInfo.type === 'source') { targetArr[targetIdx] = JSON.parse(JSON.stringify(draggedPatch)); }
+            else {
                 let sourceArr = (dragSourceInfo.type === 'build') ? buildBank : scratchpad;
                 let temp = targetArr[targetIdx];
                 targetArr[targetIdx] = draggedPatch;
@@ -223,93 +456,46 @@
             initGrids();
         }
 
-        async function loadFileToSource(filename) {
-            const fileMeta = currentLibraryData[filename];
-            document.getElementById('comment-box').innerText = `File: ${filename} | User: ${fileMeta.user || 'Unknown'} | Comments: ${fileMeta.comments || 'None'}`;
+        function startRename(idx, element) {
+            if (activeRenameIdx !== null) return;
+            activeRenameIdx = idx;
+            const input = document.createElement('input');
+            input.className = 'rename-input';
+            input.value = buildBank[idx].name;
+            const saveRename = () => {
+                let val = input.value.toUpperCase().replace(/[^A-Z0-9!@#\$%\^&\*\(\)_\-\+=\[\]\{\}\\\|;:'",\.<>\/\? ]/g, "").substring(0,6).padEnd(6," ");
+                buildBank[idx].name = val;
+                for(let i=0; i<6; i++) { buildBank[idx].data[i] = val.charCodeAt(i); }
+                activeRenameIdx = null; initGrids();
+            };
+            input.onblur = saveRename;
+            input.onkeydown = (e) => { if (e.key === 'Enter') saveRename(); };
+            element.innerText = ''; element.appendChild(input); input.focus(); input.select();
+        }
 
-            try {
-                const response = await fetch(`patches/${filename}`);
-                const arrayBuffer = await response.arrayBuffer();
-                const rawData = new Uint8Array(arrayBuffer);
-                
-                // RESTORED DENIBBILIZATION LOGIC
-                let sounds = [];
-                for (let i = 5; i < rawData.length - 1; i += 2) {
-                    sounds.push((rawData[i+1] * 16) + rawData[i]);
+        function exportBank() {
+            let fileName = prompt("Bank Name:", "NEW_BANK.SYX");
+            if (!fileName) return;
+            if (!fileName.toUpperCase().endsWith(".SYX")) fileName += ".SYX";
+            const header = [0xF0, 0x0F, 0x02, 0x01, 0x02];
+            const nibbilizedData = [];
+            let checksum = 0;
+            for (let i = 0; i < 40; i++) {
+                const patchBytes = buildBank[i] ? buildBank[i].data : new Array(102).fill(0);
+                for (let j = 0; j < 102; j++) {
+                    const byte = patchBytes[j];
+                    const i1 = byte & 0x0F; const i2 = (byte >> 4) & 0x0F;
+                    nibbilizedData.push(i1, i2); checksum = (checksum + i1 + i2) & 0x7F;
                 }
-
-                currentSourcePatches = new Array(40).fill(null);
-                const isBank = sounds.length >= 4080;
-
-                if (isBank) {
-                    for (let p = 0; p < 40; p++) {
-                        let pcb = sounds.slice(p * 102, (p + 1) * 102);
-                        let nameChars = [];
-                        for(let c=0; c<6; c++) nameChars.push(String.fromCharCode(pcb[c]));
-                        let cleanName = nameChars.join('').replace(/[^ -~]+/g, "").trim();
-                        currentSourcePatches[p] = { name: cleanName || `BNK ${p+1}`, data: pcb };
-                    }
-                } else {
-                    // Load Single Patch into Slot 1 of Source View
-                    let nameChars = [];
-                    for(let c=0; c<6; c++) nameChars.push(String.fromCharCode(sounds[c]));
-                    let cleanName = nameChars.join('').replace(/[^ -~]+/g, "").trim();
-                    currentSourcePatches[0] = { name: cleanName || "SINGLE", data: sounds.slice(0, 102) };
-                }
-                initGrids();
-            } catch (err) { console.error("File load failed", err); }
-        }
-
-        function renderTable(containerId, typeFilter) {
-            const container = document.getElementById(containerId);
-            const files = Object.entries(currentLibraryData)
-                .filter(([name, data]) => data.type === typeFilter)
-                .map(([name, data]) => ({ name, ...data }));
-
-            let html = `<table><thead><tr>
-                <th style="width: 160px;">File<div class="resizer"></div></th>
-                <th style="width: 80px;">Uploaded<div class="resizer"></div></th>
-                <th style="width: 60px;">Created<div class="resizer"></div></th>
-            </tr></thead><tbody>`;
-
-            files.forEach(f => {
-                html += `<tr onclick="loadFileToSource('${f.name}')">
-                    <td>${f.name}</td><td>${f.date}</td><td>${f.created || 'N/A'}</td>
-                </tr>`;
-            });
-            container.innerHTML = html + `</tbody></table>`;
-            attachResizers(container);
-        }
-
-        function attachResizers(container) {
-            container.querySelectorAll('th').forEach(th => {
-                const resizer = th.querySelector('.resizer');
-                if (!resizer) return;
-                resizer.addEventListener('mousedown', e => {
-                    let startX = e.pageX;
-                    let startWidth = th.offsetWidth;
-                    const onMouseMove = (me) => { th.style.width = (startWidth + (me.pageX - startX)) + 'px'; };
-                    const onMouseUp = () => { 
-                        document.removeEventListener('mousemove', onMouseMove);
-                        document.removeEventListener('mouseup', onMouseUp);
-                    };
-                    document.addEventListener('mousemove', onMouseMove);
-                    document.addEventListener('mouseup', onMouseUp);
-                });
-            });
-        }
-
-        async function refreshLibrary() {
-            const response = await fetch('get_library.php');
-            currentLibraryData = await response.json();
-            renderTable('bank-list', 'bank');
-            renderTable('single-list', 'single');
+            }
+            const fullFile = new Uint8Array([...header, ...nibbilizedData, checksum, 0xF7]);
+            const blob = new Blob([fullFile], { type: "application/octet-stream" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob); link.download = fileName; link.click();
         }
 
         function openUploadModal() { document.getElementById('modal-overlay').style.display = 'flex'; }
         function closeUploadModal() { document.getElementById('modal-overlay').style.display = 'none'; }
-        function exportBank() { alert("Exporting Bank..."); }
-
         window.addEventListener('DOMContentLoaded', () => { initGrids(); refreshLibrary(); });
     </script>
 </body>
