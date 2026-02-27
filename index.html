@@ -210,6 +210,104 @@
         .modal-input {
             width:100%; margin-bottom:10px; background:#111; color:#fff; border:1px solid #444; padding:8px; box-sizing: border-box; font-size: 11px;
         }
+        /* parameter overlay styling */
+        .param-page {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            padding: 10px;
+            margin-bottom: 20px;
+            flex: 0 1 420px; /* Width of a typical hardware page block */
+            background: #000;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .page-title {
+            color: var(--vfd);
+            font-size: 12px;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #222;
+        }
+
+        .page-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* Hardware row: 5 buttons wide */
+            gap: 2px;
+        }
+
+        .param-cell {
+            background: #151515;
+            padding: 5px;
+            text-align: center;
+            border: 1px solid #222;
+        }
+
+        .param-label {
+            font-size: 9px;
+            color: #666;
+        }
+
+        .param-value {
+            font-family: 'VT323', monospace;
+            font-size: 16px;
+            color: var(--vfd);
+        }
+        /* Update the grid to allow the Blocks to stack nicely */
+        #param-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        /* Top 9 in 3x3, middle 4 for Envelopes, bottom 4 for Utility). */
+        /* we will use a CSS Grid with named areas or a simple nth-child targeting */
+        #param-grid {
+            display: grid;
+            /* This creates a flexible grid that will naturally flow. 
+            We will use media queries or specific width logic to force the breaks. */
+            grid-template-columns: repeat(12, 1fr); 
+            gap: 15px;
+            padding: 10px;
+            align-items: start;
+        }
+
+        .param-page {
+            grid-column: span 4; /* Default: 3 per row (12/4 = 3) */
+            background: #000;
+            border: 1px solid #333;
+            padding: 8px;
+        }
+
+        /* Specific Row logic for the Envelopes (4 wide) */
+        .param-page:nth-child(n+10):nth-child(-n+13) {
+            grid-column: span 3; /* 12/3 = 4 per row */
+        }
+
+        /* Specific Row logic for the Bottom 4 (4 wide) */
+        .param-page:nth-child(n+14) {
+            grid-column: span 3; /* 12/3 = 4 per row */
+        }
+
+        /* Re-styling the hardware 2x5 grid internally */
+        .page-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 1px;
+            background: #222; /* Faux "button" lines */
+        }
+
+        .param-cell {
+            background: #0a0a0a;
+            padding: 4px 2px;
+            min-height: 35px;
+        }
+
+
+        /* END OF parameter overlay styling */
     </style>
 </head>
 <body>
@@ -368,22 +466,89 @@
             scratchpad.forEach((p, i) => pGrid.appendChild(createSlot(i, p, 'scratch')));
         }
 
-        
-        /* old displayParams in canse following one is bungled
-        
-        function displayParams() {
-            // placeholder button area for parameter overlay
-            // You can expand this to show an overlay or alert with patch data
-            if (draggedPatch) {
-                console.log("Current Patch Data:", draggedPatch.data);
-                alert("Displaying parameters for: " + draggedPatch.name);
-            } else {
-                alert("Please select or drag a patch first.");
+        const SQ80_MAP = {
+            waves: ["SAW", "BELL", "SINE", "SQUARE", "PULSE", "NOISE1", "NOISE2", "NOISE3", "BASS", "PIANO", "EL PNO", "VOICE1", "VOICE2", "KICK", "REED", "ORGAN", "SYNTH1", "SYNTH2", "SYNTH3", "FORMT1", "FORMT2", "FORMT3", "FORMT4", "FORMT5", "PULSE2", "SQR2", "4OCTS", "PRIME", "BASS2", "EPNO2", "OCTAVE", "OCT+5"], // Note: SQ-80 has 43 more waves; indices 32-74
+            modulators: ["LFO1", "LFO2", "LFO3", "ENV1", "ENV2", "ENV3", "ENV4", "VEL", "VEL2", "KYBD", "KYBD2", "WHEEL", "PEDAL", "XCTRL", "PRESS", "OFF"],
+            lfo_waves: ["TRI", "SAW", "SQR", "NOISE"],
+            
+            pages: {
+                // --- ROW 1 (Oscillators) ---
+                "OSC 1": [
+                    { label: "OCT", idx: 6, transform: v => v - 3 }, { label: "SEMI", idx: 7 }, { label: "FINE", idx: 8 }, { label: "WAVE", idx: 9, type: "wave" }, { label: "MOD1", idx: 10, type: "mod" },
+                    { label: "DEPTH", idx: 11, transform: v => v - 63 }, { label: "MOD2", idx: 12, type: "mod" }, { label: "DEPTH", idx: 13, transform: v => v - 63 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
+                ],
+                "OSC 2": [
+                    { label: "OCT", idx: 14, transform: v => v - 3 }, { label: "SEMI", idx: 15 }, { label: "FINE", idx: 16 }, { label: "WAVE", idx: 17, type: "wave" }, { label: "MOD1", idx: 18, type: "mod" },
+                    { label: "DEPTH", idx: 19, transform: v => v - 63 }, { label: "MOD2", idx: 20, type: "mod" }, { label: "DEPTH", idx: 21, transform: v => v - 63 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
+                ],
+                "OSC 3": [
+                    { label: "OCT", idx: 22, transform: v => v - 3 }, { label: "SEMI", idx: 23 }, { label: "FINE", idx: 24 }, { label: "WAVE", idx: 25, type: "wave" }, { label: "MOD1", idx: 26, type: "mod" },
+                    { label: "DEPTH", idx: 27, transform: v => v - 63 }, { label: "MOD2", idx: 28, type: "mod" }, { label: "DEPTH", idx: 29, transform: v => v - 63 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
+                ],
+                // --- ROW 2 (DCAs) ---
+                "DCA 1": [
+                    { label: "LEVEL", idx: 30 }, { label: "OFFST", idx: 31 }, { label: "MOD1", idx: 32, type: "mod" }, { label: "DEPTH", idx: 33, transform: v => v - 63 }, { label: "MOD2", idx: 34, type: "mod" },
+                    { label: "DEPTH", idx: 35, transform: v => v - 63 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
+                ],
+                "DCA 2": [
+                    { label: "LEVEL", idx: 30 }, { label: "OFFST", idx: 31 }, { label: "MOD1", idx: 32, type: "mod" }, { label: "DEPTH", idx: 33, transform: v => v - 63 }, { label: "MOD2", idx: 34, type: "mod" },
+                    { label: "DEPTH", idx: 35, transform: v => v - 63 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
+                ],
+                "DCA 3": [
+                    { label: "LEVEL", idx: 30 }, { label: "OFFST", idx: 31 }, { label: "MOD1", idx: 32, type: "mod" }, { label: "DEPTH", idx: 33, transform: v => v - 63 }, { label: "MOD2", idx: 34, type: "mod" },
+                    { label: "DEPTH", idx: 35, transform: v => v - 63 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
+                ],
+                // --- ROW 3 (LFOs) ---
+                "LFO 1": [
+                    { label: "FREQ", idx: 58 }, { label: "RESET", idx: 59, type: "bool" }, { label: "HUMAN", idx: 60, type: "bool" }, { label: "WAVE", idx: 61, type: "lfo_wave" }, { label: "DELAY", idx: 62 },
+                    { label: "L1", idx: 63 }, { label: "L2", idx: 64 }, { label: "MOD", idx: 65, type: "mod" }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
+                ],
+                "LFO 2": [
+                    { label: "FREQ", idx: 66 }, { label: "RESET", idx: 67, type: "bool" }, { label: "HUMAN", idx: 68, type: "bool" }, { label: "WAVE", idx: 69, type: "lfo_wave" }, { label: "DELAY", idx: 70 },
+                    { label: "L1", idx: 71 }, { label: "L2", idx: 72 }, { label: "MOD", idx: 73, type: "mod" }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
+                ],
+                "LFO 3": [
+                    { label: "FREQ", idx: 86 }, { label: "RESET", idx: 87, type: "bool" }, { label: "HUMAN", idx: 88, type: "bool" }, { label: "WAVE", idx: 89, type: "lfo_wave" }, { label: "DELAY", idx: 90 },
+                    { label: "L1", idx: 91 }, { label: "L2", idx: 92 }, { label: "MOD", idx: 93, type: "mod" }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
+                ],
+                // --- ROW 4 (Envelopes) ---
+                "ENV 1": [
+                    { label: "L1", idx: 74, transform: v => v - 63 }, { label: "L2", idx: 75, transform: v => v - 63 }, { label: "L3", idx: 76, transform: v => v - 63 }, { label: "LV", idx: 77 }, { label: "T1", idx: 78 },
+                    { label: "T2", idx: 79 }, { label: "T3", idx: 80 }, { label: "T4", idx: 81 }, { label: "TK", idx: 82 }, { label: "---", idx: 0 }
+                ],
+                "ENV 2": [
+                    { label: "L1", idx: 38 }, { label: "L2", idx: 39 }, { label: "L3", idx: 40 }, { label: "LV", idx: 41 }, { label: "T1", idx: 42 },
+                    { label: "T2", idx: 43 }, { label: "T3", idx: 44 }, { label: "T4", idx: 45 }, { label: "TK", idx: 46 }, { label: "---", idx: 0 }
+                ],
+                "ENV 3": [
+                    { label: "L1", idx: 47 }, { label: "L2", idx: 48 }, { label: "L3", idx: 49 }, { label: "LV", idx: 50 }, { label: "T1", idx: 51 },
+                    { label: "T2", idx: 52 }, { label: "T3", idx: 53 }, { label: "T4", idx: 54 }, { label: "TK", idx: 55 }, { label: "---", idx: 0 }
+                ],
+                "ENV 4": [
+                    { label: "L1", idx: 94 }, { label: "L2", idx: 95 }, { label: "L3", idx: 96 }, { label: "LV", idx: 97 }, { label: "T1", idx: 98 },
+                    { label: "T2", idx: 99 }, { label: "T3", idx: 100 }, { label: "T4", idx: 101 }, { label: "TK", idx: 102 }, { label: "---", idx: 0 }
+                ],
+                // --- ROW 5 (Final Filter & Utility) ---
+                "FILTER": [
+                    { label: "FREQ", idx: 38 }, { label: "Q", idx: 39 }, { label: "KEYBD", idx: 40 }, { label: "MOD1", idx: 41, type: "mod" }, { label: "DEPTH", idx: 42, transform: v => v - 63 },
+                    { label: "MOD2", idx: 43, type: "mod" }, { label: "DEPTH", idx: 44, transform: v => v - 63 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
+                ],
+                "MODE": [
+                    { label: "GLIDE", idx: 45 }, { label: "VC-AM", idx: 46, type: "bool" }, { label: "VC-SY", idx: 47, type: "bool" }, { label: "MONO", idx: 48, type: "bool" }, { label: "CYC", idx: 49, type: "bool" },
+                    { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
+                ],
+                "SPLIT": [
+                    { label: "S-PROG", idx: 51 }, { label: "S-KEY", idx: 52 }, { label: "L-PROG", idx: 53 }, { label: "---", idx: 0 }, { label: "---", idx: 0 },
+                    { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
+                ],
+                "FINAL": [
+                    { label: "VOL", idx: 50 }, { label: "PAN", idx: 54, transform: v => v - 63 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 },
+                    { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
+                ]
             }
-        }
-        
-        */
+        };
 
+        
         function displayParams() {
             if (!selectedPatchData) {
                 alert("Please select a patch first!");
@@ -395,29 +560,51 @@
             const nameHeader = document.getElementById('overlay-patch-name');
 
             nameHeader.innerText = `PATCH: ${selectedPatchData.name}`;
-            grid.innerHTML = ''; // Clear old data
+            grid.innerHTML = ''; 
 
-            // Example Mapping: ESQ-1/SQ-80 Byte offsets
-            // Note: These are simplified examples. You'll want to map more of the 102 bytes.
-            const paramMap = [
-                { label: 'OSC 1 OCT', idx: 6 },
-                { label: 'OSC 1 SEMI', idx: 7 },
-                { label: 'OSC 1 WAVE', idx: 9 },
-                { label: 'FILTER CUTOFF', idx: 38 },
-                { label: 'FILTER Q', idx: 39 },
-                { label: 'LFO 1 FREQ', idx: 58 }
-            ];
+            for (const [pageName, params] of Object.entries(SQ80_MAP.pages)) {
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'param-page';
+                pageDiv.innerHTML = `<div class="page-title">${pageName}</div>`;
+                
+                const subGrid = document.createElement('div');
+                subGrid.className = 'page-grid';
 
-            paramMap.forEach(p => {
-                const val = selectedPatchData.data[p.idx];
-                const card = document.createElement('div');
-                card.style = "background:#111; padding:10px; border-left:3px solid var(--accent); border-radius:4px;";
-                card.innerHTML = `
-                    <div style="font-size:9px; color:#888; text-transform:uppercase;">${p.label}</div>
-                    <div style="font-size:18px; color:var(--vfd); font-family:monospace;">${val}</div>
-                `;
-                grid.appendChild(card);
-            });
+                params.forEach(p => {
+                    // FIX 1: Safe data access (handles the 102nd byte correctly)
+                    const rawVal = (selectedPatchData.data && selectedPatchData.data[p.idx] !== undefined) 
+                                ? selectedPatchData.data[p.idx] 
+                                : 0;
+
+                    let displayVal = p.transform ? p.transform(rawVal) : rawVal;
+
+                    // FIX 2: Hide values for placeholder slots
+                    if (p.label === "---") {
+                        displayVal = "&nbsp;"; 
+                    } else {
+                        if (p.type === "wave") {
+                            displayVal = SQ80_MAP.waves[rawVal] || `WAV ${rawVal}`;
+                        } else if (p.type === "mod") {
+                            displayVal = SQ80_MAP.modulators[rawVal] || "OFF";
+                        } else if (p.type === "bool") {
+                            displayVal = rawVal === 1 ? "ON" : "OFF";
+                        } else if (p.type === "lfo_wave") {
+                            displayVal = SQ80_MAP.lfo_waves[rawVal] || "TRI";
+                        }
+                    }
+
+                    const cell = document.createElement('div');
+                    cell.className = 'param-cell';
+                    cell.innerHTML = `
+                        <div class="param-label">${p.label}</div>
+                        <div class="param-value">${displayVal}</div>
+                    `;
+                    subGrid.appendChild(cell);
+                });
+
+                pageDiv.appendChild(subGrid);
+                grid.appendChild(pageDiv);
+            }
 
             overlay.style.display = 'flex';
         }
