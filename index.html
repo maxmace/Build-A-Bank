@@ -156,6 +156,11 @@
             font-size: 10px !important;
         }
 
+        .slot:not(.empty):hover {
+            border: 1px solid var(--accent) !important;
+            background: rgba(74, 144, 226, 0.1);
+        }
+
         /* The Switch Container (placed far right of heading) */
         .switch-wrap {
             float: right;
@@ -305,7 +310,25 @@
         </div>
     </div>
 
+<!-- BEGIN close button and a container to  inject parameter display  -->
+<div id="param-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:var(--panel); border:2px solid var(--vfd); width:90%; max-width:900px; padding:20px; border-radius:12px; position:relative; box-shadow: 0 0 30px rgba(0,0,0,0.5);">
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #444; padding-bottom:10px; margin-bottom:20px;">
+            <h3 id="overlay-patch-name" style="color:var(--vfd); margin:0; font-family:'VT323', monospace; font-size:24px;">PATCH PARAMETERS</h3>
+            <button class="btn" style="margin:0; padding:5px 15px; background:#e74c3c;" onclick="closeParamOverlay()">CLOSE [ESC]</button>
+        </div>
+
+        <div id="param-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:15px; max-height:70vh; overflow-y:auto; padding:10px;">
+            </div>
+    </div>
+</div>
+<!-- END close button and a container to  inject parameter display  -->
+
+
     <script>
+        // track which patch is currently "active" or "highlighted"
+        let selectedPatchData = null; // This will hold the {name, data} of the clicked patch
         // VFD display
         let vfdEnabled = false; // Global state
 
@@ -344,6 +367,69 @@
             pGrid.innerHTML = '';
             scratchpad.forEach((p, i) => pGrid.appendChild(createSlot(i, p, 'scratch')));
         }
+
+        
+        /* old displayParams in canse following one is bungled
+        
+        function displayParams() {
+            // placeholder button area for parameter overlay
+            // You can expand this to show an overlay or alert with patch data
+            if (draggedPatch) {
+                console.log("Current Patch Data:", draggedPatch.data);
+                alert("Displaying parameters for: " + draggedPatch.name);
+            } else {
+                alert("Please select or drag a patch first.");
+            }
+        }
+        
+        */
+
+        function displayParams() {
+            if (!selectedPatchData) {
+                alert("Please select a patch first!");
+                return;
+            }
+
+            const overlay = document.getElementById('param-overlay');
+            const grid = document.getElementById('param-grid');
+            const nameHeader = document.getElementById('overlay-patch-name');
+
+            nameHeader.innerText = `PATCH: ${selectedPatchData.name}`;
+            grid.innerHTML = ''; // Clear old data
+
+            // Example Mapping: ESQ-1/SQ-80 Byte offsets
+            // Note: These are simplified examples. You'll want to map more of the 102 bytes.
+            const paramMap = [
+                { label: 'OSC 1 OCT', idx: 6 },
+                { label: 'OSC 1 SEMI', idx: 7 },
+                { label: 'OSC 1 WAVE', idx: 9 },
+                { label: 'FILTER CUTOFF', idx: 38 },
+                { label: 'FILTER Q', idx: 39 },
+                { label: 'LFO 1 FREQ', idx: 58 }
+            ];
+
+            paramMap.forEach(p => {
+                const val = selectedPatchData.data[p.idx];
+                const card = document.createElement('div');
+                card.style = "background:#111; padding:10px; border-left:3px solid var(--accent); border-radius:4px;";
+                card.innerHTML = `
+                    <div style="font-size:9px; color:#888; text-transform:uppercase;">${p.label}</div>
+                    <div style="font-size:18px; color:var(--vfd); font-family:monospace;">${val}</div>
+                `;
+                grid.appendChild(card);
+            });
+
+            overlay.style.display = 'flex';
+        }
+
+        function closeParamOverlay() {
+            document.getElementById('param-overlay').style.display = 'none';
+        }
+
+        // Global "Esc" key listener for quick dismissal
+        window.addEventListener('keydown', (e) => {
+            if (e.key === "Escape") closeParamOverlay();
+        });
 
         function createSlot(idx, data, type) {
             const div = document.createElement('div');
@@ -384,6 +470,11 @@
             if (type === 'build' && data) { 
                 div.ondblclick = () => startRename(idx, div); 
             }
+
+            // Add onclick listener for selecting single patch cells
+            div.onclick = () => {
+                if (data) selectPatch(data, div);
+            };
             
             return div;
         }
@@ -631,16 +722,26 @@
             link.href = URL.createObjectURL(blob); link.download = fileName; link.click();
         }
 
-        function displayParams() {
-            // placeholder button area for parameter overlay
-            // You can expand this to show an overlay or alert with patch data
-            if (draggedPatch) {
-                console.log("Current Patch Data:", draggedPatch.data);
-                alert("Displaying parameters for: " + draggedPatch.name);
-            } else {
-                alert("Please select or drag a patch first.");
-            }
+
+        // handle the visual highlighting and data assignment for selectinga  patch cell
+        function selectPatch(data, element) {
+            if (!data) return; // Don't select empty slots
+
+            // 1. Remove "selected" class from all other slots
+            document.querySelectorAll('.slot').forEach(s => s.style.border = "1px solid #333");
+            document.querySelectorAll('.slot').forEach(s => s.style.boxShadow = "none");
+
+            // 2. Highlight the clicked slot (SQ-80 Cyan Glow)
+            element.style.border = "1px solid var(--vfd)";
+            element.style.boxShadow = "0 0 8px rgba(93, 173, 226, 0.5)";
+
+            // 3. Store the data for the "Display Parameters" button
+            selectedPatchData = data;
+            
+            // Optional: Update the comment box to show what's selected
+            document.getElementById('comment-box').innerText = `Selected: ${data.name} | Ready for Parameter View`;
         }
+
         function toggleVfdFont() {
             vfdEnabled = document.getElementById('font-toggle').checked;
             initGrids(); // This triggers createSlot for every cell
