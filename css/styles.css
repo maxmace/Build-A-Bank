@@ -397,3 +397,50 @@
 
     .param-label { font-size: 8px; color: #666; text-transform: uppercase; }
     .param-value { font-family: 'VT323', monospace; font-size: 15px; color: var(--vfd); }
+
+    /* When a module block is selected, transform all values inside it */
+.param-page.active-module .param-value {
+    font-family: 'F14 Segment Alpha-Numeric Led Display', sans-serif !important;
+    color: #64eefa !important;
+    font-size: 14px !important; /* Slightly smaller to fit the grid */
+    letter-spacing: 1px;
+    text-shadow: 0 0 8px rgba(100, 238, 250, 0.5);
+    text-transform: uppercase;
+}
+
+/* Optional: Highlight the header of the active module */
+.param-page.active-module .page-title {
+    color: #fff;
+    border-bottom: 1px solid var(--vfd);
+    background: rgba(93, 173, 226, 0.1);
+}
+
+/* Ensure the grid cells don't "jump" when the font changes */
+.param-page.active-module .param-cell {
+    border: 1px solid rgba(93, 173, 226, 0.2);
+    background: #050505;
+}
+/* 1. Define the subtle VFD pulse/flicker */
+@keyframes vfd-glow {
+    0%   { opacity: 0.94; text-shadow: 0 0 8px rgba(100, 238, 250, 0.4); }
+    50%  { opacity: 1.0;  text-shadow: 0 0 12px rgba(100, 238, 250, 0.7); }
+    100% { opacity: 0.96; text-shadow: 0 0 9px rgba(100, 238, 250, 0.5); }
+}
+
+/* 2. Apply it to the active module */
+.param-page.active-module .param-value {
+    font-family: 'F14 Segment Alpha-Numeric Led Display', sans-serif !important;
+    color: #64eefa !important;
+    letter-spacing: 1px;
+    
+    /* Animation settings */
+    animation: vfd-glow 0.15s infinite alternate;
+    transition: all 0.2s ease-in-out;
+}
+
+/* 3. Add a soft background "bloom" to the active block */
+.param-page.active-module {
+    border: 1px solid rgba(100, 238, 250, 0.4) !important;
+    box-shadow: inset 0 0 15px rgba(100, 238, 250, 0.05), 0 0 10px rgba(100, 238, 250, 0.1);
+    background: rgba(10, 10, 10, 0.8);
+}
