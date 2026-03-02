@@ -107,6 +107,23 @@ const SQ80_MAP = {
     }
 }; // <--- Fixed missing closing bracket here
 
+
+/**
+ * Helper to switch the 'active-module' class to the clicked block
+ */
+function activateModule(moduleElement) {
+    // 1. Clear active status from all other pages in the overlay
+    document.querySelectorAll('.param-page').forEach(pg => {
+        pg.classList.remove('active-module');
+    });
+
+    // 2. Set the clicked module as active
+    moduleElement.classList.add('active-module');
+}
+
+/**
+ * Complete updated rendering engine with auto-focus logic
+ */
 function renderParamDisplay(selectedPatchData) {
     const grid = document.getElementById('param-grid');
     const nameHeader = document.getElementById('overlay-patch-name');
@@ -125,6 +142,10 @@ function renderParamDisplay(selectedPatchData) {
     for (const [pageName, params] of Object.entries(SQ80_MAP.pages)) {
         const pageDiv = document.createElement('div');
         pageDiv.className = 'param-page';
+        
+        // Attachment point for the module selection
+        pageDiv.onclick = () => activateModule(pageDiv);
+        
         pageDiv.innerHTML = `<div class="page-title">${pageName}</div>`;
         
         const subGrid = document.createElement('div');
@@ -156,5 +177,11 @@ function renderParamDisplay(selectedPatchData) {
         
         pageDiv.appendChild(subGrid);
         grid.appendChild(pageDiv);
+    }
+
+    // AUTO-FOCUS LOGIC: Select the first module (usually OSC 1) on load
+    const firstPage = grid.querySelector('.param-page');
+    if (firstPage) {
+        activateModule(firstPage);
     }
 }
