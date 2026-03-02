@@ -6,6 +6,16 @@ In a previous session we were working on a SPA at "https://maxmace.github.io/pat
 | FILTER | MODES | SPLIT/LAYER | DCA4 |
 So, 3 rows of 3 columns followed by 2 rows of 4 columns. You had previously named blocks more verbosely, e.g. OSC1 is "Oscillator 1" in the code. I like this, so let’s preserve it. Here is the entire current code as my "index.html" file, which I’d like you to update:
 
+
+| OSC1   | OSC2  | OSC3  | 
+| DCA1   | DCA2  | DCA3  | 
+| LFO1   | LFO2  | LFO3  | 
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -362,8 +372,8 @@ The responsive desktop version of the parameters display should look like this  
 
 
 
-| OSC1 | OCT <<value>> | SEMI <<value>>       | FINE <<value>>       | WAVE <<value>> |
-|      | MOD 1         | <<source>> <<value>> | MOD 2 | <<source>> <<value>> |
+| OSC1 | OCT <<value -3 to +5>> | SEMI <<value -12 to +12>>       | FINE <<value -31 to +31>>       | WAVE <<value from wave list. waves above "DRUMS 5" should be listed as ""WAV075" up to "WAV255" (the final wave)>> |
+|      | MOD 1         | <<source from mod list>> <<value from -62 to +63>> | MOD 2 | <<source  from mod list>> <<value  from -62 to +63>> |
 
 
 | ENV | Level 1 = ((value +/-63))     | Level 2 = ((value +/-63))     | Level 3 = ((value +/-63))     | Level Velocity = ((Linear value 00L thru 63L, followed by 00X thru 63X exponential)) | TIME 1 ATTACK VELOCITY = ((value 00 thru 63)) |
@@ -804,7 +814,7 @@ WAV255
 =========================================================
 
 | DCA 1 | LEVEL= ((value)) |                         |       | OUTPUT=((value, ON or OFF)) |
-|       | MOD1             | ((source as text from mod list)) \* ((value)) | MOD 2 | ((source name as text from mod list)) \* ((value))     |
+|       | MOD1             | ((source as text from mod list)) \* ((value -63 to +63)) | MOD 2 | ((source name as text from mod list)) \* ((value  -63 to +63))     |
 
 
 
