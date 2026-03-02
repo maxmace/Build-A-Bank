@@ -8,372 +8,7 @@
      -->
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <link href="https://db.onlinewebfonts.com/c/75714445b28a6caf0827d9dff9594cf6?family=F14+Segment+Alpha-Numeric+Led+Display" rel="stylesheet">
-    <style>
-        /* import fonts incase link in head fails */
-        @import url('https://fonts.cdnfonts.com/css/14-segment-led');
-        @import url(https://db.onlinewebfonts.com/c/75714445b28a6caf0827d9dff9594cf6?family=F14+Segment+Alpha-Numeric+Led+Display);
-        :root {
-            --bg: #121212; --panel: #1e1e1e; --accent: #4a90e2; 
-            --text: #dcdcdc; --border: #333; --vfd: #5dade2; --esq-gold: #f1c40f;
-            --instruction: #888;
-            --glass-shine: rgba(255, 255, 255, 0.15);
-            --glass-shadow: rgba(0, 0, 0, 0.4);
-        }
-        body { 
-            font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); 
-            margin: 0; display: flex; height: 100vh; overflow: hidden;
-        }
-
-        /* Sidebar Styles */
-        .sidebar { 
-            width: 380px; min-width: 300px; max-width: 800px;
-            background: var(--panel); border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; padding: 12px; box-sizing: border-box;
-            position: relative;
-        }
-        
-        .sidebar-resizer {
-            position: absolute; right: -3px; top: 0; width: 6px; height: 100%;
-            cursor: col-resize; z-index: 100;
-        }
-
-        .tab-container { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 10px; gap: 0; }
-        .tab {
-            padding: 8px 12px; font-size: 10px; font-weight: 800; color: #888;
-            text-transform: uppercase; cursor: pointer; border-radius: 4px 4px 0 0;
-            background: #1a1a1a; transition: 0.2s;
-            border: 1px solid #333; border-bottom: none; margin-right: 2px;
-        }
-        .tab:hover { color: var(--vfd); border-color: #444; }
-        .tab.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-        /* Search Bar & Nav */
-        .search-wrap { margin-bottom: 10px; display: flex; flex-direction: column; gap: 5px; }
-        .search-row { display: flex; gap: 5px; }
-        .search-input {
-            flex: 1; background: #000; border: 1px solid var(--border);
-            color: var(--vfd); padding: 6px 10px; border-radius: 4px;
-            font-size: 11px; outline: none;
-        }
-        .search-nav-btn {
-            background: #333; color: white; border: 1px solid #444;
-            padding: 0 8px; border-radius: 4px; cursor: pointer; font-size: 10px;
-        }
-        .search-nav-btn:disabled { opacity: 0.3; cursor: default; }
-        .match-counter { font-size: 9px; color: var(--accent); font-weight: bold; margin-top: 2px; }
-
-        .file-list-container { flex-grow: 1; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
-        .list-box { background: #111; border: 1px solid var(--border); flex: 1; overflow: auto; border-radius: 4px; position: relative;}
-        .tab-content { display: none; flex-direction: column; flex: 1; overflow: hidden; }
-        .tab-content.active { display: flex; }
-
-        table { width: 100%; border-collapse: collapse; font-size: 9px; table-layout: fixed; }
-        th { 
-            position: sticky; top: 0; background: #222; color: var(--accent); 
-            text-align: left; padding: 5px; cursor: pointer; border-bottom: 2px solid var(--border);
-            white-space: nowrap; overflow: hidden; z-index: 5;
-        }
-        th:hover { background: #333; color: #fff; }
-        th.sort-active { color: var(--esq-gold); }
-        
-        td { padding: 4px 6px; border-bottom: 1px solid #222; white-space: nowrap; color: #aaa; overflow: hidden; text-overflow: ellipsis; }
-        tr:hover td { background: #222; color: var(--vfd); cursor: pointer; }
-        tr.search-highlight td { background: rgba(74, 144, 226, 0.2); color: #fff; border-left: 2px solid var(--accent); }
-        tr.active-match td { background: rgba(241, 196, 15, 0.3); color: var(--esq-gold); }
-        
-        .resizer { position: absolute; right: 0; top: 0; height: 100%; width: 5px; cursor: col-resize; z-index: 10; }
-
-        .btn { 
-            background: linear-gradient(180deg, var(--glass-shine) 0%, rgba(255,255,255,0) 50%, var(--glass-shadow) 100%), var(--accent);
-            color: white; border: 1px solid rgba(255,255,255,0.2); 
-            padding: 10px; font-weight: bold; cursor: pointer; border-radius: 6px; font-size: 11px;
-            text-shadow: 0px 1px 2px rgba(0,0,0,0.5);
-            box-shadow: inset 1px 1px 1px rgba(255,255,255,0.3), 0px 4px 6px rgba(0,0,0,0.3);
-            transition: all 0.1s ease; text-transform: uppercase; margin-top: 10px;
-        }
-        /* Dark Blue Variation of your Glass Button */
-        .btn-blue {
-            --accent-blue: #1a3a5f; /* Deep Navy/Dark Blue */
-            background: linear-gradient(180deg, var(--glass-shine) 0%, rgba(255,255,255,0) 50%, var(--glass-shadow) 100%), var(--accent-blue) !important;
-            border-color: rgba(74, 144, 226, 0.4) !important; /* Slight glow on the border */
-        }
-
-        .btn-blue:hover {
-            filter: brightness(1.2);
-            box-shadow: 0px 0px 8px rgba(74, 144, 226, 0.5);
-        }
-
-        .main-content { flex: 1; padding: 15px 25px; overflow-y: auto; display: flex; flex-direction: column; }
-        .workflow-bridge { display: flex; align-items: center; justify-content: center; margin: 15px 0; gap: 15px; }
-        .bridge-line { height: 3px; background: var(--accent); flex: 1; border-radius: 2px; }
-        .bridge-text { font-size: 11px; font-weight: 700; color: var(--accent); white-space: nowrap; text-transform: uppercase; }
-        .arrow-dn { color: var(--accent); font-size: 24px; font-weight: 900; }
-        
-        .bank-quadrant { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; background: rgba(255,255,255,0.02); padding: 8px; border-radius: 6px; }
-        .int-group { background: #000; padding: 6px; border: 1px solid #444; border-radius: 4px; }
-        .int-header { font-size: 9px; color: var(--esq-gold); margin-bottom: 4px; font-weight: bold; }
-        .patch-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; }
-        
-        .slot { 
-            height: 30px; 
-            background: #222; 
-            border: 1px solid #333; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: grab; 
-            position: relative;
-            /* Default font */
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px; 
-            color: var(--vfd); 
-        }
-        
-        /* 1. The Base LED Font Class */
-        .vfd-font {
-            /* Fixed: Removed trailing comma */
-            font-family: 'F14 Segment Alpha-Numeric Led Display', sans-serif !important;
-            color: #64eefa !important;
-            font-size: 16px; 
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        /* 2. Specific behavior for non-empty VFD slots */
-        /* If you want the LED font to show, ensure VT323 isn't hijacking it here */
-        .vfd-font:not(.empty) {
-            font-family: 'F14 Segment Alpha-Numeric Led Display', sans-serif !important;
-            color: #64eefa !important;
-            font-size: 10px !important; 
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        /* 3. Keep empty slots clean */
-        .slot.empty { 
-            color: #333 !important; 
-            font-family: 'JetBrains Mono', monospace !important; 
-            font-size: 10px !important;
-        }
-
-        .slot:not(.empty):hover {
-            border: 1px solid var(--accent) !important;
-            background: rgba(74, 144, 226, 0.1);
-        }
-
-        /* The Switch Container (placed far right of heading) */
-        .switch-wrap {
-            float: right;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 9px;
-            color: #777;
-            margin-top: -2px;
-        }
-
-        /* Simple Slider CSS */
-        .switch {
-            position: relative; display: inline-block; width: 30px; height: 16px;
-        }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #333; transition: .4s; border-radius: 16px;
-        }
-        .slider:before {
-            position: absolute; content: ""; height: 10px; width: 10px; left: 3px; bottom: 3px;
-            background-color: white; transition: .4s; border-radius: 50%;
-        }
-        input:checked + .slider { background-color: var(--accent); }
-        input:checked + .slider:before { transform: translateX(14px); }
-
-        .rename-input { 
-            position: absolute; width: 90%; height: 80%; background: #000; color: var(--esq-gold);
-            border: 1px solid var(--accent); text-align: center; font-family: 'JetBrains Mono', monospace;
-            font-size: 10px; text-transform: uppercase; outline: none; z-index: 5;
-        }
-
-        .workshop-area { background: #161616; padding: 12px; border-radius: 8px; border: 1px solid #222; }
-        .scratch-compact { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #333; }
-        #comment-box { background: #0a0a0a; border: 1px solid var(--accent); color: var(--vfd); padding: 8px 12px; height: 28px; font-size: 11px; margin-bottom: 12px; border-radius: 4px; display: flex; align-items: center; }
-
-        #modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85); display: none;
-            align-items: center; justify-content: center; z-index: 1000;
-        }
-        .modal-content {
-            background: var(--panel); border: 1px solid var(--accent);
-            padding: 25px; border-radius: 12px; width: 400px;
-        }
-        .modal-input {
-            width:100%; margin-bottom:10px; background:#111; color:#fff; border:1px solid #444; padding:8px; box-sizing: border-box; font-size: 11px;
-        }
-
-        /* parameter overlay styling */
-        #param-overlay {
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.85); 
-            backdrop-filter: blur(4px); 
-            z-index: 2000; 
-            align-items: center; 
-            justify-content: center;
-        }
-
-        #param-grid {
-            display: grid;
-            /* CRITICAL: This defines the 12-unit coordinate system */
-            grid-template-columns: repeat(12, 1fr); 
-            gap: 15px;
-            padding: 20px;
-            width: 90vw;
-            max-width: 1200px;
-            background: var(--panel);
-            border: 2px solid var(--vfd);
-            border-radius: 12px;
-        }
-
-        .param-page {
-            background: #000;
-            border: 1px solid #333;
-            padding: 10px;
-            border-radius: 4px;
-            /* Default: 3 per row (12 columns / 4 span = 3 blocks) */
-            grid-column: span 4; 
-        }
-
-        /* 2x4 Grid logic: Blocks 10 through 17 (Envelopes & Utilities) 
-           To get 4 per row, they must span 3 columns (12/3 = 4) */
-        .param-page:nth-child(n+10) {
-            grid-column: span 3;
-        }
-
-        .page-title {
-            color: var(--vfd);
-            font-size: 11px;
-            letter-spacing: 2px;
-            margin-bottom: 8px;
-            border-bottom: 1px solid #222;
-            text-transform: uppercase;
-        }
-
-        .page-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr); 
-            gap: 1px;
-            background: #222; 
-        }
-
-        .param-cell {
-            background: #0a0a0a;
-            padding: 6px 2px;
-            min-height: 40px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .param-label {
-            font-size: 9px;
-            color: #666;
-        }
-
-        .param-value {
-            font-family: 'VT323', monospace;
-            font-size: 16px;
-            color: var(--vfd);
-        }
-        /* END OF parameter overlay styling */
-
-/* Parameter Overlay Base */
-#param-overlay {
-        display: none; 
-        position: fixed; 
-        top: 0; left: 0; 
-        width: 100%; height: 100%; 
-        background: rgba(0,0,0,0.85); 
-        backdrop-filter: blur(4px); 
-        z-index: 2000; 
-        align-items: center; 
-        justify-content: center;
-    }
-
-    /* The modal window itself */
-    .param-modal-container {
-        background: var(--panel); 
-        border: 2px solid var(--vfd); 
-        width: 95%; 
-        max-width: 1200px; /* Increased to fit 4 blocks comfortably */
-        padding: 20px; 
-        border-radius: 12px; 
-        position: relative; 
-        box-shadow: 0 0 30px rgba(0,0,0,0.5);
-    }
-
-    /* The Grid Container */
-    #param-grid {
-        display: grid;
-        grid-template-columns: repeat(12, 1fr); /* The 12-column foundation */
-        gap: 15px;
-        max-height: 75vh;
-        overflow-y: auto;
-        padding: 10px;
-    }
-
-    /* Individual Page Blocks (OSC, DCA, LFO, etc.) */
-    .param-page {
-        background: #000;
-        border: 1px solid #333;
-        padding: 8px;
-        border-radius: 4px;
-        grid-column: span 4; /* Default: 3 blocks per row (12 / 4 = 3) */
-    }
-
-    /* 3x3 Logic: The first 9 blocks use the default span 4 above */
-
-    /* 2x4 Logic: From the 10th block onwards, switch to span 3 (12 / 3 = 4) */
-    .param-page:nth-child(n+10) {
-        grid-column: span 3;
-    }
-
-    /* Internal Parameter Layout (Hardware 2x5 Style) */
-    .page-title {
-        color: var(--vfd);
-        font-size: 11px;
-        letter-spacing: 1px;
-        margin-bottom: 6px;
-        border-bottom: 1px solid #222;
-        text-transform: uppercase;
-    }
-
-    .page-grid {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr); 
-        gap: 1px;
-        background: #222; 
-    }
-
-    .param-cell {
-        background: #0a0a0a;
-        padding: 4px 2px;
-        min-height: 38px;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-
-    .param-label { font-size: 8px; color: #666; text-transform: uppercase; }
-    .param-value { font-family: 'VT323', monospace; font-size: 15px; color: var(--vfd); }
-
-
-
-        </style>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
@@ -401,7 +36,10 @@
     </div>
 
     <div class="main-content">
-        <div id="comment-box">Metadata: Select a file to view internal patches...</div>
+        <div id="comment-box" style="display: flex; justify-content: space-between; align-items: center; padding: 5px 15px; background: #1a1a1a; border: 1px solid #333; margin-bottom: 10px; font-family: 'VT323', monospace; color: var(--vfd);">
+            <span id="status-left">File: (None Loaded)</span>
+            <span id="status-right">Patch: (None Selected)</span>
+        </div>
         
         <section>
             <h2 style="font-size: 12px; color: var(--vfd); margin-bottom: 4px; display: block; width: 100%;">
@@ -487,7 +125,8 @@
 </div>
 <!-- END close button and a container to  inject parameter display  -->
 
-
+    <script src="js/sq80-params.js"></script>
+    
     <script>
         // track which patch is currently "active" or "highlighted"
         let selectedPatchData = null; // This will hold the {name, data} of the clicked patch
@@ -530,164 +169,7 @@
             scratchpad.forEach((p, i) => pGrid.appendChild(createSlot(i, p, 'scratch')));
         }
 
-        const SQ80_MAP = {
-            waves: ["SAW", "BELL", "SINE", "SQUARE", "PULSE", "NOISE1", "NOISE2", "NOISE3", "BASS", "PIANO", "EL PNO", "VOICE1", "VOICE2", "KICK", "REED", "ORGAN", "SYNTH1", "SYNTH2", "SYNTH3", "FORMT1", "FORMT2", "FORMT3", "FORMT4", "FORMT5", "PULSE2", "SQR2", "4OCTS", "PRIME", "BASS2", "EPNO2", "OCTAVE", "OCT+5"], // Note: SQ-80 has 43 more waves; indices 32-74
-            modulators: ["LFO1", "LFO2", "LFO3", "ENV1", "ENV2", "ENV3", "ENV4", "VEL", "VEL2", "KYBD", "KYBD2", "WHEEL", "PEDAL", "XCTRL", "PRESS", "OFF"],
-            lfo_waves: ["TRI", "SAW", "SQR", "NOISE"],
-            
-            pages: {
-                // --- ROW 1 (Oscillators) ---
-                "OSC 1": [
-                    { label: "OCT", idx: 6, transform: v => v - 3 }, { label: "SEMI", idx: 7 }, { label: "FINE", idx: 8 }, { label: "WAVE", idx: 9, type: "wave" }, { label: "MOD1", idx: 10, type: "mod" },
-                    { label: "DEPTH", idx: 11, transform: v => v - 63 }, { label: "MOD2", idx: 12, type: "mod" }, { label: "DEPTH", idx: 13, transform: v => v - 63 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
-                ],
-                "OSC 2": [
-                    { label: "OCT", idx: 14, transform: v => v - 3 }, { label: "SEMI", idx: 15 }, { label: "FINE", idx: 16 }, { label: "WAVE", idx: 17, type: "wave" }, { label: "MOD1", idx: 18, type: "mod" },
-                    { label: "DEPTH", idx: 19, transform: v => v - 63 }, { label: "MOD2", idx: 20, type: "mod" }, { label: "DEPTH", idx: 21, transform: v => v - 63 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
-                ],
-                "OSC 3": [
-                    { label: "OCT", idx: 22, transform: v => v - 3 }, { label: "SEMI", idx: 23 }, { label: "FINE", idx: 24 }, { label: "WAVE", idx: 25, type: "wave" }, { label: "MOD1", idx: 26, type: "mod" },
-                    { label: "DEPTH", idx: 27, transform: v => v - 63 }, { label: "MOD2", idx: 28, type: "mod" }, { label: "DEPTH", idx: 29, transform: v => v - 63 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
-                ],
-                // --- ROW 2 (DCAs) ---
-                "DCA 1": [
-                    { label: "LEVEL", idx: 30 }, { label: "OFFST", idx: 31 }, { label: "MOD1", idx: 32, type: "mod" }, { label: "DEPTH", idx: 33, transform: v => v - 63 }, { label: "MOD2", idx: 34, type: "mod" },
-                    { label: "DEPTH", idx: 35, transform: v => v - 63 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
-                ],
-                "DCA 2": [
-                    { label: "LEVEL", idx: 30 }, { label: "OFFST", idx: 31 }, { label: "MOD1", idx: 32, type: "mod" }, { label: "DEPTH", idx: 33, transform: v => v - 63 }, { label: "MOD2", idx: 34, type: "mod" },
-                    { label: "DEPTH", idx: 35, transform: v => v - 63 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
-                ],
-                "DCA 3": [
-                    { label: "LEVEL", idx: 30 }, { label: "OFFST", idx: 31 }, { label: "MOD1", idx: 32, type: "mod" }, { label: "DEPTH", idx: 33, transform: v => v - 63 }, { label: "MOD2", idx: 34, type: "mod" },
-                    { label: "DEPTH", idx: 35, transform: v => v - 63 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
-                ],
-                // --- ROW 3 (LFOs) ---
-                "LFO 1": [
-                    { label: "FREQ", idx: 58 }, { label: "RESET", idx: 59, type: "bool" }, { label: "HUMAN", idx: 60, type: "bool" }, { label: "WAVE", idx: 61, type: "lfo_wave" }, { label: "DELAY", idx: 62 },
-                    { label: "L1", idx: 63 }, { label: "L2", idx: 64 }, { label: "MOD", idx: 65, type: "mod" }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
-                ],
-                "LFO 2": [
-                    { label: "FREQ", idx: 66 }, { label: "RESET", idx: 67, type: "bool" }, { label: "HUMAN", idx: 68, type: "bool" }, { label: "WAVE", idx: 69, type: "lfo_wave" }, { label: "DELAY", idx: 70 },
-                    { label: "L1", idx: 71 }, { label: "L2", idx: 72 }, { label: "MOD", idx: 73, type: "mod" }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
-                ],
-                "LFO 3": [
-                    { label: "FREQ", idx: 86 }, { label: "RESET", idx: 87, type: "bool" }, { label: "HUMAN", idx: 88, type: "bool" }, { label: "WAVE", idx: 89, type: "lfo_wave" }, { label: "DELAY", idx: 90 },
-                    { label: "L1", idx: 91 }, { label: "L2", idx: 92 }, { label: "MOD", idx: 93, type: "mod" }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
-                ],
-                // --- ROW 4 (Envelopes) ---
-                "ENV 1": [
-                    /* Row 1: Levels & Velocity */
-                    { label: "L1", idx: 74, transform: v => ((v & 127) - 63) }, 
-                    { label: "L2", idx: 75, transform: v => ((v & 127) - 63) }, 
-                    { label: "L3", idx: 76, transform: v => ((v & 127) - 63) }, 
-                    { label: "LV", idx: 77, transform: formatLV }, 
-                    { label: "T1V", idx: 83, transform: formatStandard },
-                    /* Row 2: Times & Tracking */
-                    { label: "T1", idx: 78, transform: formatStandard }, 
-                    { label: "T2", idx: 79, transform: formatStandard }, 
-                    { label: "T3", idx: 80, transform: formatStandard }, 
-                    { label: "T4", idx: 81, transform: formatT4 }, 
-                    { label: "TK", idx: 82, transform: formatStandard }
-                ],
-                "ENV 2": [
-                    /* Row 1: Levels & Velocity */
-                    { label: "L1", idx: 38, transform: v => ((v & 127) - 63) }, 
-                    { label: "L2", idx: 39, transform: v => ((v & 127) - 63) }, 
-                    { label: "L3", idx: 40, transform: v => ((v & 127) - 63) }, 
-                    { label: "LV", idx: 41, transform: formatLV }, 
-                    { label: "T1V", idx: 84, transform: formatStandard },
-                    /* Row 2: Times & Tracking */
-                    { label: "T1", idx: 42, transform: formatStandard }, 
-                    { label: "T2", idx: 43, transform: formatStandard }, 
-                    { label: "T3", idx: 44, transform: formatStandard }, 
-                    { label: "T4", idx: 45, transform: formatT4 }, 
-                    { label: "TK", idx: 46, transform: formatStandard }
-                ],
-                "ENV 3": [
-                    /* Row 1: Levels & Velocity */
-                    { label: "L1", idx: 47, transform: v => ((v & 127) - 63) }, 
-                    { label: "L2", idx: 48, transform: v => ((v & 127) - 63) }, 
-                    { label: "L3", idx: 49, transform: v => ((v & 127) - 63) }, 
-                    { label: "LV", idx: 50, transform: formatLV }, 
-                    { label: "T1V", idx: 85, transform: formatStandard },
-                    /* Row 2: Times & Tracking */
-                    { label: "T1", idx: 51, transform: formatStandard }, 
-                    { label: "T2", idx: 52, transform: formatStandard }, 
-                    { label: "T3", idx: 53, transform: formatStandard }, 
-                    { label: "T4", idx: 54, transform: formatT4 }, 
-                    { label: "TK", idx: 55, transform: formatStandard }
-                ],
-                "ENV 4": [
-                    /* Row 1: Levels & Velocity */
-                    { label: "L1", idx: 94, transform: v => ((v & 127) - 63) }, 
-                    { label: "L2", idx: 95, transform: v => ((v & 127) - 63) }, 
-                    { label: "L3", idx: 96, transform: v => ((v & 127) - 63) }, 
-                    { label: "LV", idx: 97, transform: formatLV }, 
-                    { label: "T1V", idx: 103, transform: formatStandard },
-                    /* Row 2: Times & Tracking */
-                    { label: "T1", idx: 98, transform: formatStandard }, 
-                    { label: "T2", idx: 99, transform: formatStandard }, 
-                    { label: "T3", idx: 100, transform: formatStandard }, 
-                    { label: "T4", idx: 101, transform: formatT4 }, 
-                    { label: "TK", idx: 102, transform: formatStandard }
-                ],
-                // --- ROW 5 (Final Filter & Utility) ---
-                "FILTER": [
-                    { label: "FREQ", idx: 38 }, { label: "Q", idx: 39 }, { label: "KEYBD", idx: 40 }, { label: "MOD1", idx: 41, type: "mod" }, { label: "DEPTH", idx: 42, transform: v => v - 63 },
-                    { label: "MOD2", idx: 43, type: "mod" }, { label: "DEPTH", idx: 44, transform: v => v - 63 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
-                ],
-                "MODE": [
-                    { label: "GLIDE", idx: 45 }, { label: "VC-AM", idx: 46, type: "bool" }, { label: "VC-SY", idx: 47, type: "bool" }, { label: "MONO", idx: 48, type: "bool" }, { label: "CYC", idx: 49, type: "bool" },
-                    { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
-                ],
-                "SPLIT": [
-                    { label: "S-PROG", idx: 51 }, { label: "S-KEY", idx: 52 }, { label: "L-PROG", idx: 53 }, { label: "---", idx: 0 }, { label: "---", idx: 0 },
-                    { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
-                ],
-                "FINAL": [
-                    { label: "VOL", idx: 50 }, { label: "PAN", idx: 54, transform: v => v - 63 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 },
-                    { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }, { label: "---", idx: 0 }
-                ]
-            }
-        };
-
-        /**
-         * Formats Envelope Level Velocity (LV)
-         * Range: 0-63 (Linear), 64-127 (Exponential)
-         */
-        function formatLV(raw) {
-            // Mask to 7-bit to prevent "255" errors
-            const val = raw & 127; 
-            if (val <= 63) {
-                return val.toString().padStart(2, '0') + 'L';
-            } else {
-                return (val - 64).toString().padStart(2, '0') + 'X';
-            }
-        }
-
-        /**
-         * Formats Envelope Time 4 (T4)
-         * Range: 0-63 (Normal), 64-127 (Extended/Reverb)
-         */
-        function formatT4(raw) {
-            const val = raw & 127;
-            if (val <= 63) {
-                return val.toString().padStart(2, '0');
-            } else {
-                return (val - 64).toString().padStart(2, '0') + 'R';
-            }
-        }
-
-        /**
-         * Standard 0-63 Sourcing (For T1, T2, T3, TK, etc.)
-         * Ensures values stay within the 6-bit hardware range
-         */
-        function formatStandard(raw) {
-            // Mask to 63 (6-bit) as per SQ-80 hardware specs for these params
-            const val = raw & 63; 
-            return val.toString().padStart(2, '0');
-        }
+        
         
         function displayParams() {
             if (!selectedPatchData) {
@@ -695,58 +177,11 @@
                 return;
             }
 
-            const overlay = document.getElementById('param-overlay');
-            const grid = document.getElementById('param-grid');
-            const nameHeader = document.getElementById('overlay-patch-name');
+            // Call the rendering engine from sq80-params.js
+            renderParamDisplay(selectedPatchData);
 
-            nameHeader.innerText = `PATCH: ${selectedPatchData.name}`;
-            grid.innerHTML = ''; 
-
-            for (const [pageName, params] of Object.entries(SQ80_MAP.pages)) {
-                const pageDiv = document.createElement('div');
-                pageDiv.className = 'param-page';
-                pageDiv.innerHTML = `<div class="page-title">${pageName}</div>`;
-                
-                const subGrid = document.createElement('div');
-                subGrid.className = 'page-grid';
-
-                params.forEach(p => {
-                    // FIX 1: Safe data access (handles the 102nd byte correctly)
-                    const rawVal = (selectedPatchData.data && selectedPatchData.data[p.idx] !== undefined) 
-                                ? selectedPatchData.data[p.idx] 
-                                : 0;
-
-                    let displayVal = p.transform ? p.transform(rawVal) : rawVal;
-
-                    // FIX 2: Hide values for placeholder slots
-                    if (p.label === "---") {
-                        displayVal = "&nbsp;"; 
-                    } else {
-                        if (p.type === "wave") {
-                            displayVal = SQ80_MAP.waves[rawVal] || `WAV ${rawVal}`;
-                        } else if (p.type === "mod") {
-                            displayVal = SQ80_MAP.modulators[rawVal] || "OFF";
-                        } else if (p.type === "bool") {
-                            displayVal = rawVal === 1 ? "ON" : "OFF";
-                        } else if (p.type === "lfo_wave") {
-                            displayVal = SQ80_MAP.lfo_waves[rawVal] || "TRI";
-                        }
-                    }
-
-                    const cell = document.createElement('div');
-                    cell.className = 'param-cell';
-                    cell.innerHTML = `
-                        <div class="param-label">${p.label}</div>
-                        <div class="param-value">${displayVal}</div>
-                    `;
-                    subGrid.appendChild(cell);
-                });
-
-                pageDiv.appendChild(subGrid);
-                grid.appendChild(pageDiv);
-            }
-
-            overlay.style.display = 'flex';
+            // Show the overlay
+            document.getElementById('param-overlay').style.display = 'flex';
         }
 
         function closeParamOverlay() {
@@ -934,7 +369,10 @@
 
         async function loadFileToSource(filename) {
             const fileMeta = currentLibraryData[filename];
-            document.getElementById('comment-box').innerText = `File: ${filename} | Author: ${fileMeta.user || 'Unknown'} | Original: ${fileMeta.original_date || 'Unknown'}`;
+            
+            // UPDATE: Target the left side of the status bar
+            document.getElementById('status-left').innerText = `BANK: ${filename} | Author: ${fileMeta.user || 'Unknown'}`;
+            
             try {
                 const response = await fetch(`patches/${filename}`);
                 const arrayBuffer = await response.arrayBuffer();
@@ -1060,21 +498,23 @@
 
         // handle the visual highlighting and data assignment for selectinga  patch cell
         function selectPatch(data, element) {
-            if (!data) return; // Don't select empty slots
+            if (!data) return; 
 
-            // 1. Remove "selected" class from all other slots
-            document.querySelectorAll('.slot').forEach(s => s.style.border = "1px solid #333");
-            document.querySelectorAll('.slot').forEach(s => s.style.boxShadow = "none");
+            // 1. Clear previous highlights
+            document.querySelectorAll('.slot').forEach(s => {
+                s.style.border = "1px solid #333";
+                s.style.boxShadow = "none";
+            });
 
-            // 2. Highlight the clicked slot (SQ-80 Cyan Glow)
+            // 2. Highlight selected
             element.style.border = "1px solid var(--vfd)";
             element.style.boxShadow = "0 0 8px rgba(93, 173, 226, 0.5)";
 
-            // 3. Store the data for the "Display Parameters" button
+            // 3. Store data
             selectedPatchData = data;
             
-            // Optional: Update the comment box to show what's selected
-            document.getElementById('comment-box').innerText = `Selected: ${data.name} | Ready for Parameter View`;
+            // UPDATE: Target the right side of the status bar
+            document.getElementById('status-right').innerText = `SELECTED: ${data.name} | [Ready]`;
         }
 
         function toggleVfdFont() {
