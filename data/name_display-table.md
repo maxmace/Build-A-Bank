@@ -1,3 +1,5 @@
+VFD characters account for 64 glyphs, from blank space to letter zed
+
 
 | hardware VFD Character set       | desired browser Translation                                           |
 | -------------------------------- | --------------------------------------------------------------------- |
