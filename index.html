@@ -577,20 +577,60 @@
                 ],
                 // --- ROW 4 (Envelopes) ---
                 "ENV 1": [
-                    { label: "L1", idx: 74, transform: v => v - 63 }, { label: "L2", idx: 75, transform: v => v - 63 }, { label: "L3", idx: 76, transform: v => v - 63 }, { label: "LV", idx: 77 }, { label: "T1", idx: 78 },
-                    { label: "T2", idx: 79 }, { label: "T3", idx: 80 }, { label: "T4", idx: 81 }, { label: "TK", idx: 82 }, { label: "---", idx: 0 }
+                    /* Row 1: Levels & Velocity */
+                    { label: "L1", idx: 74, transform: v => ((v & 127) - 63) }, 
+                    { label: "L2", idx: 75, transform: v => ((v & 127) - 63) }, 
+                    { label: "L3", idx: 76, transform: v => ((v & 127) - 63) }, 
+                    { label: "LV", idx: 77, transform: formatLV }, 
+                    { label: "T1V", idx: 83, transform: formatStandard },
+                    /* Row 2: Times & Tracking */
+                    { label: "T1", idx: 78, transform: formatStandard }, 
+                    { label: "T2", idx: 79, transform: formatStandard }, 
+                    { label: "T3", idx: 80, transform: formatStandard }, 
+                    { label: "T4", idx: 81, transform: formatT4 }, 
+                    { label: "TK", idx: 82, transform: formatStandard }
                 ],
                 "ENV 2": [
-                    { label: "L1", idx: 38 }, { label: "L2", idx: 39 }, { label: "L3", idx: 40 }, { label: "LV", idx: 41 }, { label: "T1", idx: 42 },
-                    { label: "T2", idx: 43 }, { label: "T3", idx: 44 }, { label: "T4", idx: 45 }, { label: "TK", idx: 46 }, { label: "---", idx: 0 }
+                    /* Row 1: Levels & Velocity */
+                    { label: "L1", idx: 38, transform: v => ((v & 127) - 63) }, 
+                    { label: "L2", idx: 39, transform: v => ((v & 127) - 63) }, 
+                    { label: "L3", idx: 40, transform: v => ((v & 127) - 63) }, 
+                    { label: "LV", idx: 41, transform: formatLV }, 
+                    { label: "T1V", idx: 84, transform: formatStandard },
+                    /* Row 2: Times & Tracking */
+                    { label: "T1", idx: 42, transform: formatStandard }, 
+                    { label: "T2", idx: 43, transform: formatStandard }, 
+                    { label: "T3", idx: 44, transform: formatStandard }, 
+                    { label: "T4", idx: 45, transform: formatT4 }, 
+                    { label: "TK", idx: 46, transform: formatStandard }
                 ],
                 "ENV 3": [
-                    { label: "L1", idx: 47 }, { label: "L2", idx: 48 }, { label: "L3", idx: 49 }, { label: "LV", idx: 50 }, { label: "T1", idx: 51 },
-                    { label: "T2", idx: 52 }, { label: "T3", idx: 53 }, { label: "T4", idx: 54 }, { label: "TK", idx: 55 }, { label: "---", idx: 0 }
+                    /* Row 1: Levels & Velocity */
+                    { label: "L1", idx: 47, transform: v => ((v & 127) - 63) }, 
+                    { label: "L2", idx: 48, transform: v => ((v & 127) - 63) }, 
+                    { label: "L3", idx: 49, transform: v => ((v & 127) - 63) }, 
+                    { label: "LV", idx: 50, transform: formatLV }, 
+                    { label: "T1V", idx: 85, transform: formatStandard },
+                    /* Row 2: Times & Tracking */
+                    { label: "T1", idx: 51, transform: formatStandard }, 
+                    { label: "T2", idx: 52, transform: formatStandard }, 
+                    { label: "T3", idx: 53, transform: formatStandard }, 
+                    { label: "T4", idx: 54, transform: formatT4 }, 
+                    { label: "TK", idx: 55, transform: formatStandard }
                 ],
                 "ENV 4": [
-                    { label: "L1", idx: 94 }, { label: "L2", idx: 95 }, { label: "L3", idx: 96 }, { label: "LV", idx: 97 }, { label: "T1", idx: 98 },
-                    { label: "T2", idx: 99 }, { label: "T3", idx: 100 }, { label: "T4", idx: 101 }, { label: "TK", idx: 102 }, { label: "---", idx: 0 }
+                    /* Row 1: Levels & Velocity */
+                    { label: "L1", idx: 94, transform: v => ((v & 127) - 63) }, 
+                    { label: "L2", idx: 95, transform: v => ((v & 127) - 63) }, 
+                    { label: "L3", idx: 96, transform: v => ((v & 127) - 63) }, 
+                    { label: "LV", idx: 97, transform: formatLV }, 
+                    { label: "T1V", idx: 103, transform: formatStandard },
+                    /* Row 2: Times & Tracking */
+                    { label: "T1", idx: 98, transform: formatStandard }, 
+                    { label: "T2", idx: 99, transform: formatStandard }, 
+                    { label: "T3", idx: 100, transform: formatStandard }, 
+                    { label: "T4", idx: 101, transform: formatT4 }, 
+                    { label: "TK", idx: 102, transform: formatStandard }
                 ],
                 // --- ROW 5 (Final Filter & Utility) ---
                 "FILTER": [
@@ -612,6 +652,42 @@
             }
         };
 
+        /**
+         * Formats Envelope Level Velocity (LV)
+         * Range: 0-63 (Linear), 64-127 (Exponential)
+         */
+        function formatLV(raw) {
+            // Mask to 7-bit to prevent "255" errors
+            const val = raw & 127; 
+            if (val <= 63) {
+                return val.toString().padStart(2, '0') + 'L';
+            } else {
+                return (val - 64).toString().padStart(2, '0') + 'X';
+            }
+        }
+
+        /**
+         * Formats Envelope Time 4 (T4)
+         * Range: 0-63 (Normal), 64-127 (Extended/Reverb)
+         */
+        function formatT4(raw) {
+            const val = raw & 127;
+            if (val <= 63) {
+                return val.toString().padStart(2, '0');
+            } else {
+                return (val - 64).toString().padStart(2, '0') + 'R';
+            }
+        }
+
+        /**
+         * Standard 0-63 Sourcing (For T1, T2, T3, TK, etc.)
+         * Ensures values stay within the 6-bit hardware range
+         */
+        function formatStandard(raw) {
+            // Mask to 63 (6-bit) as per SQ-80 hardware specs for these params
+            const val = raw & 63; 
+            return val.toString().padStart(2, '0');
+        }
         
         function displayParams() {
             if (!selectedPatchData) {
